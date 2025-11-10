@@ -1,6 +1,10 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const { randomUUID } = require("crypto");
+const { sendResponse } = require("../../responses");
+const calculateSum = require("../calculateSum");
+const createBookingConfirm = require("../createBookingConfirm");
+const calculateDuration = require("../calculateDuration");
 
 const client = new DynamoDBClient({ region: "eu-north-1" });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -22,6 +26,9 @@ exports.createBooking = async (event) => {
       createdAt: new Date().toISOString(),
     };
 
+    const sum = calculateSum(booking.rooms, calculateDuration(checkInDate, checkOutDate));
+    const bookingConfirm = createBookingConfirm(booking, sum);
+
     await docClient.send(
       new PutCommand({
         TableName: "bookings",
@@ -29,14 +36,14 @@ exports.createBooking = async (event) => {
       })
     );
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({ message: "Booking created", booking }),
-    };
+    return (
+      sendResponse(200, {content: bookingConfirm})
+  );
+
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Could not create booking" }),
-    };
+    console.error('Error:', error);
+    return (
+      sendResponse(500, {success: false, message: 'could not create booking'})
+    )
   }
 };
