@@ -6,20 +6,53 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 exports.getBookings = async (event) => {
   try {
-    const name = event.queryStringParameters?.name; 
-    const params = { TableName: "bookings" };
+    const queryParams = event.queryStringParameters || {};
+    const { name, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
 
+    // Hämta ALLA bokningar först
+    const data = await docClient.send(new ScanCommand({ TableName: "bookings" }));
+    let bookings = data.Items || [];
+
+    // Filtrera i JS (case-insensitive)
     if (name) {
-      params.FilterExpression = "contains(#name, :name)";
-      params.ExpressionAttributeNames = { "#name": "name" };
-      params.ExpressionAttributeValues = { ":name": name };
+      bookings = bookings.filter((b) =>
+        b.name?.toLowerCase().includes(name.toLowerCase())
+      );
     }
 
-    const data = await docClient.send(new ScanCommand(params));
+    if (email) {
+      bookings = bookings.filter((b) =>
+        b.email?.toLowerCase().includes(email.toLowerCase())
+      );
+    }
 
+    if (guests) {
+      bookings = bookings.filter((b) => b.guests === Number(guests));
+    }
+
+    if (checkInDate) {
+      bookings = bookings.filter((b) => b.checkInDate === checkInDate);
+    }
+
+    if (checkOutDate) {
+      bookings = bookings.filter((b) => b.checkOutDate === checkOutDate);
+    }
+
+    if (roomType) {
+      // Filtrerar om "rooms" innehåller t.ex. "double"
+      const search = roomType.toLowerCase();
+      bookings = bookings.filter((b) =>
+        JSON.stringify(b.rooms).toLowerCase().includes(search)
+      );
+    }
+
+    // Returnera resultatet
     return {
       statusCode: 200,
-      body: JSON.stringify({ bookings: data.Items }),
+      body: JSON.stringify({
+        count: bookings.length,
+        bookings,
+      }),
     };
   } catch (error) {
     console.error("Error:", error);
