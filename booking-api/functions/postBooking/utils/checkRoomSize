@@ -1,0 +1,25 @@
+function checkRoomSize(guests, rooms) {
+
+    const roomSizes = {
+    single: 1,
+    double: 2,
+    suite: 3,
+  }
+
+  let size = false;
+  let beds = 0;
+
+  for (const [roomType, quantity] of Object.entries(rooms)) {
+  const roomSize = roomSizes[roomType] || 0;
+  beds += roomSize * quantity;
+}
+
+  if(guests <= beds) {
+    size = true
+  }
+  
+  return size;
+
+}
+
+module.exports = checkRoomSize;
