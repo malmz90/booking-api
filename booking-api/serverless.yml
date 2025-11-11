@@ -12,7 +12,8 @@ provider:
         - Effect: Allow
           Action:
             - dynamodb:PutItem
-            - dynamodb:DeleteItem 
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
           Resource:
             - arn:aws:dynamodb:${self:provider.region}:*:table/bookings
 
@@ -30,6 +31,13 @@ functions:
       - httpApi:
           path: /bookings/{id}
           method: delete
+
+  getBookings:
+    handler: functions/getBookings/index.getBookings
+    events:
+      - httpApi:
+          path: /bookings
+          method: get
 
 resources:
   Resources:
