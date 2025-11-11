@@ -7,6 +7,7 @@ const createBookingConfirm = require("./utils/createBookingConfirm");
 const calculateDuration = require("./utils/calculateDuration");
 const { getBookedRooms, countRooms } = require("./utils/bookingUtils");
 const checkRoomSize = require("./utils/checkRoomSize");
+const validateBooking = require("./utils/validateBooking");
 
 const client = new DynamoDBClient({ region: "eu-north-1" });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -14,6 +15,12 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.createBooking = async (event) => {
   try {
     const body = JSON.parse(event.body);
+
+    const validation = validateBooking(body);
+    if (!validation.valid) {
+      return sendResponse(400, { error: validation.error });
+    }
+
     const { guests, rooms, checkInDate, checkOutDate, name, email } = body;
 
     const bookedRooms = await getBookedRooms(checkInDate, checkOutDate);
@@ -31,8 +38,10 @@ exports.createBooking = async (event) => {
     }
 
     if (!checkRoomSize(guests, rooms)) {
-      return sendResponse(500, {error: "Too many guests, choose different room type(s)"});
-      };
+      return sendResponse(500, {
+        error: "Too many guests, choose different room type(s)",
+      });
+    }
 
     const bookingId = randomUUID();
     const booking = {
