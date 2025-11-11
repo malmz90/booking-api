@@ -32,6 +32,13 @@ functions:
           path: /bookings/{id}
           method: delete
 
+  getBookings:
+    handler: functions/getBookings/index.getBookings
+    events:
+      - httpApi:
+          path: /bookings
+          method: get
+
 resources:
   Resources:
     BookingsTable:
