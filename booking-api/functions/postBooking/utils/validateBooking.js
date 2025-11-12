@@ -56,6 +56,11 @@ function validateBooking(body) {
     return { valid: false, error: "Name is required" };
   }
 
+  //validera email
+  if (!email.includes("@") || !email.includes(".")) {
+    return { valid: false, error: "Invalid email format" };
+  }
+
   return { valid: true };
 }
 
