@@ -14,6 +14,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:DeleteItem
             - dynamodb:Scan
+            - dynamodb:UpdateItem
           Resource:
             - arn:aws:dynamodb:${self:provider.region}:*:table/bookings
 

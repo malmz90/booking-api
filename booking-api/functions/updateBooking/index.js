@@ -35,6 +35,7 @@ exports.updateBooking = async (event) => {
         body.sum = newSum;
 
         // 4. Bygg upp UpdateExpression för DynamoDB
+        const expressionAttributeNames = {};
         let updateExpression = 'set ';
         const expressionAttributeValues = {};
         const allowedUpdates = [
@@ -42,15 +43,28 @@ exports.updateBooking = async (event) => {
             'rooms', 
             'checkInDate', 
             'checkOutDate', 
-            'name', 
+            'guest', 
             'email',
             'sum'
         ];
 
         for (const key of allowedUpdates) {
             if (body[key] !== undefined) {
-                updateExpression += `${key} = :${key}, `;
-                expressionAttributeValues[`:${key}`] = body[key];
+                if (key === 'guest') {
+                    // Hantera 'guest'
+                    updateExpression += `#g = :guestValue, `; 
+                    expressionAttributeNames['#g'] = 'guest'; 
+                    expressionAttributeValues[':guestValue'] = body.guest; 
+                } else if (key === 'sum') { // <-- LÄGG TILL LOGIK FÖR 'sum'
+                    // Hantera 'sum'
+                    updateExpression += `#s = :sumValue, `; 
+                    expressionAttributeNames['#s'] = 'sum'; // Mappar alias #s till 'sum'
+                    expressionAttributeValues[':sumValue'] = body.sum; 
+                } else {
+                    // För alla andra fält
+                    updateExpression += `${key} = :${key}, `;
+                    expressionAttributeValues[`:${key}`] = body[key];
+                }
             }
         }
 
@@ -68,6 +82,7 @@ exports.updateBooking = async (event) => {
                 Key: { bookingId: bookingId },
                 UpdateExpression: updateExpression,
                 ExpressionAttributeValues: expressionAttributeValues,
+                ExpressionAttributeNames: expressionAttributeNames,
             })
         );
 
