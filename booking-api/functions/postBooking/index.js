@@ -21,7 +21,7 @@ exports.createBooking = async (event) => {
       return sendResponse(400, { error: validation.error });
     }
 
-    const { guests, rooms, checkInDate, checkOutDate, name, email } = body;
+    const { guests, rooms, checkInDate, checkOutDate, guest, email } = body;
 
     const bookedRooms = await getBookedRooms(checkInDate, checkOutDate);
     const requestedRooms = countRooms(rooms);
@@ -50,7 +50,7 @@ exports.createBooking = async (event) => {
       rooms,
       checkInDate,
       checkOutDate,
-      name,
+      guest,
       email,
       createdAt: new Date().toISOString(),
     };
