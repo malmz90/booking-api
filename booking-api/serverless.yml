@@ -39,6 +39,13 @@ functions:
           path: /bookings
           method: get
 
+  updateBooking:  
+    handler: functions/updateBooking/index.updateBooking
+    events:
+      - httpApi:
+          path: /bookings/{id}
+          method: put
+
 resources:
   Resources:
     BookingsTable:
