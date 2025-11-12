@@ -15,6 +15,7 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:GetItem
             - dynamodb:Scan
+            - dynamodb:UpdateItem
           Resource:
             - arn:aws:dynamodb:${self:provider.region}:*:table/bookings
 
@@ -39,6 +40,13 @@ functions:
       - httpApi:
           path: /bookings
           method: get
+
+  updateBooking:  
+    handler: functions/updateBooking/index.updateBooking
+    events:
+      - httpApi:
+          path: /bookings/{id}
+          method: put
 
 resources:
   Resources:
