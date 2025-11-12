@@ -7,46 +7,57 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.getBookings = async (event) => {
   try {
     const queryParams = event.queryStringParameters || {};
-    const { name, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
+    const { guest, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
 
-    // Hämta ALLA bokningar först
-    const data = await docClient.send(new ScanCommand({ TableName: "bookings" }));
-    let bookings = data.Items || [];
+    let filterExpressions = [];
+    let expressionValues = {};
 
-    // Filtrera i JS (case-insensitive)
-    if (name) {
-      bookings = bookings.filter((b) =>
-        b.name?.toLowerCase().includes(name.toLowerCase())
-      );
+    if (guest) {
+      filterExpressions.push("contains(#guest, :guest)");
+      expressionValues[":guest"] = guest;
     }
 
     if (email) {
-      bookings = bookings.filter((b) =>
-        b.email?.toLowerCase().includes(email.toLowerCase())
-      );
+      filterExpressions.push("contains(#email, :email)");
+      expressionValues[":email"] = email;
     }
 
     if (guests) {
-      bookings = bookings.filter((b) => b.guests === Number(guests));
+      filterExpressions.push("guests = :guests");
+      expressionValues[":guests"] = Number(guests);
     }
 
     if (checkInDate) {
-      bookings = bookings.filter((b) => b.checkInDate === checkInDate);
+      filterExpressions.push("checkInDate = :checkInDate");
+      expressionValues[":checkInDate"] = checkInDate;
     }
 
     if (checkOutDate) {
-      bookings = bookings.filter((b) => b.checkOutDate === checkOutDate);
+      filterExpressions.push("checkOutDate = :checkOutDate");
+      expressionValues[":checkOutDate"] = checkOutDate;
     }
 
     if (roomType) {
-      // Filtrerar om "rooms" innehåller t.ex. "double"
-      const search = roomType.toLowerCase();
-      bookings = bookings.filter((b) =>
-        JSON.stringify(b.rooms).toLowerCase().includes(search)
-      );
+      filterExpressions.push("contains(#rooms, :roomType)");
+      expressionValues[":roomType"] = roomType;
     }
 
-    // Returnera resultatet
+    const params = {
+      TableName: "bookings",
+      ...(filterExpressions.length > 0 && {
+        FilterExpression: filterExpressions.join(" AND "),
+        ExpressionAttributeValues: expressionValues,
+        ExpressionAttributeNames: {
+          "#guest": "guest",
+          "#email": "email",
+          "#rooms": "rooms",
+        },
+      }),
+    };
+
+    const data = await docClient.send(new ScanCommand(params));
+    const bookings = data.Items || [];
+
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -55,7 +66,7 @@ exports.getBookings = async (event) => {
       }),
     };
   } catch (error) {
-    console.error("Error:", error);
+    console.error("❌ Error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Could not fetch bookings" }),

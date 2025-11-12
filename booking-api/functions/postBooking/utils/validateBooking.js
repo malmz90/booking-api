@@ -1,8 +1,8 @@
 function validateBooking(body) {
-  const { guests, rooms, checkInDate, checkOutDate, name, email } = body;
+  const { guests, rooms, checkInDate, checkOutDate, guest, email } = body;
 
   // Kolla att alla fält finns
-  if (!guests || !rooms || !checkInDate || !checkOutDate || !name || !email) {
+  if (!guests || !rooms || !checkInDate || !checkOutDate || !guest || !email) {
     return { valid: false, error: "Missing required fields" };
   }
 
@@ -52,7 +52,7 @@ function validateBooking(body) {
   }
 
   // Validera namn
-  if (typeof name !== "string" || name.trim().length === 0) {
+  if (typeof guest !== "string" || guest.trim().length === 0) {
     return { valid: false, error: "Name is required" };
   }
 
