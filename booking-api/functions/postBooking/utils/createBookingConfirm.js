@@ -1,7 +1,7 @@
 function createBookingConfirm(booking, sum) {
   return {
     bookingId: booking.bookingId,
-    name: booking.name,
+    guest: booking.guest,
     guests: booking.guests,
     rooms: booking.rooms,
     checkInDate: booking.checkInDate,

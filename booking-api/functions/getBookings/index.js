@@ -7,14 +7,14 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.getBookings = async (event) => {
   try {
     const queryParams = event.queryStringParameters || {};
-    const { name, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
+    const { guest, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
 
     let filterExpressions = [];
     let expressionValues = {};
 
-    if (name) {
-      filterExpressions.push("contains(#name, :name)");
-      expressionValues[":name"] = name;
+    if (guest) {
+      filterExpressions.push("contains(#guest, :guest)");
+      expressionValues[":guest"] = guest;
     }
 
     if (email) {
@@ -48,7 +48,7 @@ exports.getBookings = async (event) => {
         FilterExpression: filterExpressions.join(" AND "),
         ExpressionAttributeValues: expressionValues,
         ExpressionAttributeNames: {
-          "#name": "name",
+          "#guest": "guest",
           "#email": "email",
           "#rooms": "rooms",
         },
