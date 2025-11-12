@@ -7,16 +7,16 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.getBookings = async (event) => {
   try {
     const queryParams = event.queryStringParameters || {};
-    const { name, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
+    const { guest, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
 
     // Hämta ALLA bokningar först
     const data = await docClient.send(new ScanCommand({ TableName: "bookings" }));
     let bookings = data.Items || [];
 
     // Filtrera i JS (case-insensitive)
-    if (name) {
+    if (guest) {
       bookings = bookings.filter((b) =>
-        b.name?.toLowerCase().includes(name.toLowerCase())
+        b.guest?.toLowerCase().includes(guest.toLowerCase())
       );
     }
 
