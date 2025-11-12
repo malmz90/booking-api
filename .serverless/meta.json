@@ -1,8 +1,23 @@
 {
   "unknown": {
     "versionFramework": "4.23.0",
-    "command": [],
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "command": [
+      "login"
+    ],
     "options": {},
+    "orgId": "fe61f0df-7f3f-4b7d-b269-864ab46dd649",
+    "orgName": "saeid",
+    "userId": "9KhYjcYN76CKwP0Fmh",
+    "userName": "saeid",
     "serviceProviderAwsCfStackId": null,
     "serviceProviderAwsCfStackCreated": null,
     "serviceProviderAwsCfStackUpdated": null,
