@@ -1,5 +1,8 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  ScanCommand,
+} = require("@aws-sdk/lib-dynamodb");
 
 const client = new DynamoDBClient({ region: "eu-north-1" });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -7,19 +10,23 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.getBookings = async (event) => {
   try {
     const queryParams = event.queryStringParameters || {};
-    const { guest, email, guests, checkInDate, checkOutDate, roomType } = queryParams;
+    const { guest, email, guests, checkInDate, checkOutDate, roomType } =
+      queryParams;
 
     let filterExpressions = [];
     let expressionValues = {};
+    let expressionNames = {};
 
     if (guest) {
       filterExpressions.push("contains(#guest, :guest)");
       expressionValues[":guest"] = guest;
+      expressionNames["#guest"] = "guest";
     }
 
     if (email) {
       filterExpressions.push("contains(#email, :email)");
       expressionValues[":email"] = email;
+      expressionNames["#email"] = "email";
     }
 
     if (guests) {
@@ -40,6 +47,7 @@ exports.getBookings = async (event) => {
     if (roomType) {
       filterExpressions.push("contains(#rooms, :roomType)");
       expressionValues[":roomType"] = roomType;
+      expressionNames["#rooms"] = "rooms";
     }
 
     const params = {
@@ -47,11 +55,9 @@ exports.getBookings = async (event) => {
       ...(filterExpressions.length > 0 && {
         FilterExpression: filterExpressions.join(" AND "),
         ExpressionAttributeValues: expressionValues,
-        ExpressionAttributeNames: {
-          "#guest": "guest",
-          "#email": "email",
-          "#rooms": "rooms",
-        },
+        ...(Object.keys(expressionNames).length > 0 && {
+          ExpressionAttributeNames: expressionNames,
+        }),
       }),
     };
 
